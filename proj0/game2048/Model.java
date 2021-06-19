@@ -114,12 +114,80 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+        for (int i = size() - 1; i > -1; i--) {
+            for (int j = 0; j < size(); j++) {
+                Tile targetTile = getTargetTile(j, i);
+                if (targetTile != null){
+                    int tileNum = targetTile.value();
+                    boolean merge = board.move(j, i, targetTile);
+                    if (merge)
+                        score+=tileNum*2;
+                    changed = true;
+                }
+            }
+        }
+
         checkGameOver();
         if (changed) {
             setChanged();
         }
         return changed;
     }
+
+    public Tile getAjacentTarget(int col, int row){
+        if (!validIndex(row-1, size())){
+            return null;
+        }
+        for (int i = row-1; i > -1 ; i--) {
+            if (tile(col, i) != null){
+                if (tile(col, row).value() == tile(col, i).value()){
+                    int localScore = tile(col, i).value();
+                    score+=localScore*2;
+                    board.move(col, row, tile(col, row-1));
+                    return tile(col, row);
+                }else{
+                    return null;
+                }
+            }
+
+        }
+        return null;
+    }
+
+
+    public Tile getTargetTile(int col, int row){
+        if (tile(col, row) == null){
+            if (validIndex(row-1, size())){
+                for (int i = row - 1; i > -1; i--) {
+                    if (tile(col, i) != null){
+                        Tile adjacentTile = getAjacentTarget(col, i);
+                        if (adjacentTile != null){
+                            return adjacentTile;
+                        }
+                        return tile(col, i);
+                    }
+                }
+                return null;
+            }
+        }else{
+            if (validIndex(row-1, size())){
+                for (int i = row-1; i > -1 ; i--) {
+                    if (tile(col, i) != null){
+                        if (tile(col, i).value() == tile(col, row).value()){
+                            return tile(col, i);
+                        }else{
+                            return null;
+                        }
+                    }
+
+                }
+
+            }
+        }
+        return null;
+
+    }
+
 
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
@@ -138,6 +206,13 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                //if there is one space empty
+                if (b.tile(i, j) == null)
+                    return true;
+            }
+        }
         return false;
     }
 
@@ -148,6 +223,15 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                if (!(b.tile(i,j) == null)) {
+                    if (b.tile(i, j).value() == Model.MAX_PIECE)
+                        return true;
+                }
+            }
+
+        }
         return false;
     }
 
@@ -159,7 +243,48 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b))
+            return true;
+
+        for (int i = 0; i < b.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                if (adjacentWithSameValue(b.tile(i, j), b))
+                    return true;
+            }
+        }
         return false;
+    }
+
+    public static boolean adjacentWithSameValue(Tile t, Board b){
+        //handling the row
+        for (int i = -1; i <= 1; i++) {
+            int rowMove = t.row() + i;
+            if (rowMove == t.row())
+                continue;
+            if (validIndex(rowMove, b.size())){
+                //see if the value in any adjacent is the same
+                if (b.tile(t.col(), rowMove).value() == t.value())
+                    return true;
+            }
+        }
+
+        //handling the col
+        for (int j = -1; j <= 1; j++) {
+            int colMove = t.col() + j;
+            if (colMove == t.col())
+                continue;
+            if (validIndex(colMove, b.size())){
+                //see if the value in any adjacent is the same
+                if (b.tile(colMove, t.row()).value() == t.value())
+                    return true;
+            }
+
+        }
+        return false;
+    }
+
+    public static boolean validIndex(int index, int size){
+        return index>=0 && index<size;
     }
 
 

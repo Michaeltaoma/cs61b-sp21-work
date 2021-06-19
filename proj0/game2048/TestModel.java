@@ -22,6 +22,14 @@ public class TestModel extends TestUtils {
      */
 
     @Test
+    public void randomTest(){
+        for (int i = 0; i > 0 ; i++) {
+            System.out.println("Run!");
+        }
+    }
+
+
+    @Test
     /** Checks right two pieces merge when 3 adjacent pieces have same value. */
     public void testTripleMerge1() {
         int[][] before = new int[][]{
