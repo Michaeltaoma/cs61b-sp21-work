@@ -114,6 +114,55 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+        changed = handleSideMove(side);
+
+        checkGameOver();
+        if (changed) {
+            setChanged();
+        }
+        return changed;
+    }
+
+    /**
+     * Change the perspective of the board so that every incoming side behave as NORTH.
+     * @param side The side that the user wants the board to tilt to.
+     * @return the variable to notice GUI to handle change in the model.
+     * */
+    public boolean handleSideMove(Side side){
+        boolean changed;
+        changed = false;
+
+        switch (side) {
+            case NORTH:
+                board.setViewingPerspective(Side.NORTH);
+                changed = mainTilt();
+                break;
+            case SOUTH:
+                board.setViewingPerspective(Side.SOUTH);
+                changed = mainTilt();
+                break;
+            case WEST:
+                board.setViewingPerspective(Side.WEST);
+                changed = mainTilt();
+                break;
+            case EAST:
+                board.setViewingPerspective(Side.EAST);
+                changed = mainTilt();
+                break;
+            default:
+        }
+        board.setViewingPerspective(Side.NORTH);
+        return changed;
+    }
+
+    /**
+     * The main tilt logic which loops over each tile from top left.
+     * @return the variable to notice GUI to handle change in the model.
+     * */
+    public boolean mainTilt(){
+        boolean changed;
+        changed = false;
+
         for (int i = size() - 1; i > -1; i--) {
             for (int j = 0; j < size(); j++) {
                 Tile targetTile = getTargetTile(j, i);
@@ -126,35 +175,16 @@ public class Model extends Observable {
                 }
             }
         }
-
-        checkGameOver();
-        if (changed) {
-            setChanged();
-        }
         return changed;
     }
 
-    public Tile getAjacentTarget(int col, int row){
-        if (!validIndex(row-1, size())){
-            return null;
-        }
-        for (int i = row-1; i > -1 ; i--) {
-            if (tile(col, i) != null){
-                if (tile(col, row).value() == tile(col, i).value()){
-                    int localScore = tile(col, i).value();
-                    score+=localScore*2;
-                    board.move(col, row, tile(col, row-1));
-                    return tile(col, row);
-                }else{
-                    return null;
-                }
-            }
-
-        }
-        return null;
-    }
-
-
+    /**
+     * Get the target tile that can be move to the given tile position.
+     * @param col The column index for the tile position.
+     * @param row The row index for the tile position.
+     * @return The tile that can be move to the given tile position. Null
+     *         indicates that nothing can be move the current position.
+     * */
     public Tile getTargetTile(int col, int row){
         if (tile(col, row) == null){
             if (validIndex(row-1, size())){
@@ -185,9 +215,37 @@ public class Model extends Observable {
             }
         }
         return null;
-
     }
 
+    /**
+     * Helper method that handle situation [_, *, *, *] in which stars denote
+     * a value or empty tile and the underline denotes current empty spot.
+     * This method first perform merge if possible. If merge is possible, tiles
+     * will be first merged to the current position and the method return the
+     * current tile.
+     * @param col The column index for the tile position.
+     * @param row The row index for the tile position.
+     * @return Current tile after merged. Null indicates that merge is not possible.
+     *
+     * */
+    public Tile getAjacentTarget(int col, int row){
+        if (!validIndex(row-1, size())){
+            return null;
+        }
+        for (int i = row-1; i > -1 ; i--) {
+            if (tile(col, i) != null){
+                if (tile(col, row).value() == tile(col, i).value()){
+                    int localScore = tile(col, i).value();
+                    score+=localScore*2;
+                    board.move(col, row, tile(col, i));
+                    return tile(col, row);
+                }else{
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
 
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
