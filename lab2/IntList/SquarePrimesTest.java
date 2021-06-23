@@ -5,6 +5,22 @@ import org.junit.Test;
 
 public class SquarePrimesTest {
 
+    @Test
+    public void testSquarePrimes1() {
+        IntList lst = IntList.of(2, 15, 16, 17, 13);
+        boolean changed = IntListExercises.squarePrimes(lst);
+        assertEquals("4 -> 15 -> 16 -> 289 -> 169", lst.toString());
+        assertTrue(changed);
+    }
+
+    @Test
+    public void testSquarePrimes2() {
+        IntList lst = IntList.of(4, 15, 16, 18, 20);
+        boolean changed = IntListExercises.squarePrimes(lst);
+        assertEquals("4 -> 15 -> 16 -> 18 -> 20", lst.toString());
+        assertFalse(changed);
+    }
+
     /**
      * Here is a test for isPrime method. Try running it.
      * It passes, but the starter code implementation of isPrime
